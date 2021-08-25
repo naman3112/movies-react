@@ -7,45 +7,58 @@ export default class Movies extends Component {
             movies: getMovies()
         }
     }
+  deleteHandler=(id)=>{
+     
+   let newMovies=  this.state.movies.filter((movie)=>{
+      
+            return movie._id!=id
+     })
+  this.setState({movies: newMovies});
+  
+    }
+
 
     render() {
         return (
-            <div className='row'>
-                <div className='col-3'>
-                    hello-col-3
-                </div>
-                <div className='col-9'>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">First</th>
-                                <th scope="col">Last</th>
-                                <th scope="col">Handle</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>@fat</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td colspan="2">Larry the Bird</td>
-                                <td>@twitter</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div className='container'>
+                <div className='row'>
+                    <div className='col-3'>
+                        hello-col-3
+                    </div>
+                    <div className='col-9'>
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Genre</th>
+                                    <th scope="col">Stock</th>
+                                    <th scope="col">Rate</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    this.state.movies.map((movieObj) => {
+                                        return (
+                                            <tr scope='row'>
+                                                <td></td>
+                                                <td> {movieObj.title} </td>
+                                                <td> {movieObj.genre.name} </td>
+                                                <td>{movieObj.numberInStock}</td>
+                                                <td>{movieObj.dailyRentalRate}</td>
+                                                <td><button onClick={()=>{return this.deleteHandler(movieObj._id)}} type="button" className="btn btn-danger">Delete</button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         )
     }
 }
