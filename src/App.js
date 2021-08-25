@@ -1,9 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
-
+import Movies from './Components/Movies';
 function App() {
   return (
-  <h1>Helllo</h1>
+    <Movies/>
   );
 }
 
