@@ -5,15 +5,16 @@ export default class Movies extends Component {
         super();
         this.state = {
             movies: getMovies(),
-            currSearchText: ''
+            currSearchText: '',
+            sortBasis:''
         }
     }
-    handleChange=(e)=>{
-        let val=e.target.value;
+    handleChange = (e) => {
+        let val = e.target.value;
         console.log(val);
-    this.setState({
-        currSearchText: val
-    })
+        this.setState({
+            currSearchText: val
+        })
     }
     deleteHandler = (id) => {
 
@@ -23,28 +24,59 @@ export default class Movies extends Component {
         this.setState({ movies: newMovies });
 
     }
-
-
+    handleClickInc=(e)=>{
+       //console.log('i am pressed')
+       this.setState({sortBasis: 'inc'})
+        
+    }
+    handleClickDec=(e)=>{
+        //console.log('i am pressed')
+        this.setState({sortBasis: 'dec'})
+        //console.log(e.target.value)     
+     }
+ 
     render() {
         console.log('render')
-        let {movies,currSearchText}=this.state;
-        let filteredArr=[];
-        if(currSearchText==''){
-            filteredArr=movies;
-        }else{
-            filteredArr=movies.filter(function(movieObj){
-                let title=movieObj.title.toLowerCase();
+        let { movies, currSearchText } = this.state;
+        let filteredArr = [];
+        if (currSearchText == '') {
+            filteredArr = movies;
+        } else {
+            filteredArr = movies.filter(function (movieObj) {
+                let title = movieObj.title.toLowerCase();
                 console.log(title);
                 return title.includes(currSearchText.toLowerCase());
             })
         }
 
-     
+        if(this.state.sortBasis!=''){
+            if(this.state.sortBasis=='inc'){
+                console.log('here i am ')
+              filteredArr.sort(function(obj1,obj2){
+
+                  let rate1=obj1.dailyRentalRate;
+                  let rate2=obj2.dailyRentalRate;
+                  console.log("rate-1", rate1);
+                  console.log("rate-2",rate2)
+                  return rate1-rate2;
+              }) 
+              console.log("filtered Array is ",filteredArr)     
+            }else{
+
+                filteredArr.sort(function(obj1,obj2){
+                    let rate1=obj1.dailyRentalRate;
+                    let rate2=obj2.dailyRentalRate;
+                       return rate2-rate1;
+                })
+            }
+
+        }
+
+
         return (
             <div className='container'>
                 <div className='row'>
                     <div className='col-3'>
-                        hello-col-3
                     </div>
                     <div className='col-9'>
                         <input type='search' value={this.state.currSearchText} onChange={this.handleChange}></input>
@@ -52,10 +84,26 @@ export default class Movies extends Component {
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Title</th>
+                                    <th scope="col">Title
+                                    </th>
                                     <th scope="col">Genre</th>
                                     <th scope="col">Stock</th>
-                                    <th scope="col">Rate</th>
+                                    <th scope="col">Rate
+                                        <button
+                                        onClick={this.handleClickInc}
+                                        value={'inc'}
+                                        >
+                                            <i class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        </button>
+
+                                        <button
+                                         onClick={this.handleClickDec}
+                                         value={'dec'}
+                                        >
+                                            <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                                        </button>
+
+                                    </th>
                                     <th></th>
                                 </tr>
                             </thead>
