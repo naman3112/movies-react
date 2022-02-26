@@ -6,7 +6,9 @@ export default class Movies extends Component {
         this.state = {
             movies: getMovies(),
             currSearchText: '',
-            sortBasis:''
+            sortBasis: '',
+            currPage: 2,
+            limit: 4
         }
     }
     handleChange = (e) => {
@@ -24,20 +26,48 @@ export default class Movies extends Component {
         this.setState({ movies: newMovies });
 
     }
-    handleClickInc=(e)=>{
-       //console.log('i am pressed')
-       this.setState({sortBasis: 'inc'})
-        
-    }
-    handleClickDec=(e)=>{
+    handleClickInc = (e) => {
         //console.log('i am pressed')
-        this.setState({sortBasis: 'dec'})
+        this.setState({ sortBasis: 'inc' })
+
+    }
+    handleClickDec = (e) => {
+        //console.log('i am pressed')
+        this.setState({ sortBasis: 'dec' })
         //console.log(e.target.value)     
-     }
- 
+    }
+
+    // class funtion of increment and decrement
+    sortByRatings = (e) => {
+        let className = e.target.className;
+        console.log(className);
+        let sortedMovies = [];
+
+        if (className == 'fa fa-arrow-up') {
+            sortedMovies = this.state.movies.sort(function (movieObjA, movieObjB) {
+                return movieObjA.dailyRentalRate - movieObjB.dailyRentalRate
+            })
+        } else {
+            sortedMovies = this.state.movies.sort(function (movieObjA, movieObjB) {
+                return movieObjB.dailyRentalRate - movieObjA.dailyRentalRate
+            })
+        }
+        this.setState(
+            {
+                movies: sortedMovies
+            }
+        )
+    }
+
+    handlePagechange=(pageNumber)=>{
+        this.setState({
+            currPage:pageNumber
+        })
+    }
+
     render() {
         console.log('render')
-        let { movies, currSearchText } = this.state;
+        let { movies, currSearchText, currPage, limit } = this.state;
         let filteredArr = [];
         if (currSearchText == '') {
             filteredArr = movies;
@@ -49,30 +79,38 @@ export default class Movies extends Component {
             })
         }
 
-        if(this.state.sortBasis!=''){
-            if(this.state.sortBasis=='inc'){
+        if (this.state.sortBasis != '') {
+            if (this.state.sortBasis == 'inc') {
                 console.log('here i am ')
-              filteredArr.sort(function(obj1,obj2){
+                filteredArr.sort(function (obj1, obj2) {
 
-                  let rate1=obj1.dailyRentalRate;
-                  let rate2=obj2.dailyRentalRate;
-                  console.log("rate-1", rate1);
-                  console.log("rate-2",rate2)
-                  return rate1-rate2;
-              }) 
-              console.log("filtered Array is ",filteredArr)     
-            }else{
+                    let rate1 = obj1.dailyRentalRate;
+                    let rate2 = obj2.dailyRentalRate;
+                    console.log("rate-1", rate1);
+                    console.log("rate-2", rate2)
+                    return rate1 - rate2;
+                })
+                console.log("filtered Array is ", filteredArr)
+            } else {
 
-                filteredArr.sort(function(obj1,obj2){
-                    let rate1=obj1.dailyRentalRate;
-                    let rate2=obj2.dailyRentalRate;
-                       return rate2-rate1;
+                filteredArr.sort(function (obj1, obj2) {
+                    let rate1 = obj1.dailyRentalRate;
+                    let rate2 = obj2.dailyRentalRate;
+                    return rate2 - rate1;
                 })
             }
 
         }
+        let numberofPage= Math.ceil(filteredArr.length/limit);
+        let pageNumerArr=[];
+        
+        for(let i=0;i<numberofPage;i++){
+            pageNumerArr.push(i+1);
+        }
 
-
+        let si = (currPage - 1) * limit;
+        let ei = si + limit;
+        filteredArr = filteredArr.slice(si, ei);
         return (
             <div className='container'>
                 <div className='row'>
@@ -89,19 +127,13 @@ export default class Movies extends Component {
                                     <th scope="col">Genre</th>
                                     <th scope="col">Stock</th>
                                     <th scope="col">Rate
-                                        <button
-                                        onClick={this.handleClickInc}
-                                        value={'inc'}
-                                        >
-                                            <i class="fa fa-arrow-up" aria-hidden="true"></i>
-                                        </button>
+                                        <i
+                                            onClick={this.sortByRatings}
+                                            class="fa fa-arrow-up" aria-hidden="true"></i>
+                                        <i
+                                            onClick={this.sortByRatings}
+                                            class="fa fa-arrow-down" aria-hidden="true"></i>
 
-                                        <button
-                                         onClick={this.handleClickDec}
-                                         value={'dec'}
-                                        >
-                                            <i class="fa fa-arrow-down" aria-hidden="true"></i>
-                                        </button>
 
                                     </th>
                                     <th></th>
@@ -125,6 +157,22 @@ export default class Movies extends Component {
                                 }
                             </tbody>
                         </table>
+                        <nav aria-label="...">
+                            <ul className="pagination">
+                             {
+                              pageNumerArr.map((pageNumber)=>{
+                                  let classStyle=pageNumber==currPage?'page-item active':'page-item'
+                                    return (
+                                        <li key={pageNumber} onClick={()=>this.handlePagechange(pageNumber)} className={classStyle}><a className="page-link" href="#">{pageNumber}</a></li>
+                                    )
+                                })
+                                      
+                             }
+                                
+                            </ul>
+                        </nav>
+
+
                     </div>
                 </div>
             </div>
@@ -132,3 +180,8 @@ export default class Movies extends Component {
         )
     }
 }
+{/* <li className="page-item"><a className="page-link" href="#">1</a></li>
+                                <li className="page-item active" aria-current="page">
+                                    <a className="page-link" href="#">2</a>
+                                </li>
+                                <li className="page-item"><a className="page-link" href="#">3</a></li> */}
