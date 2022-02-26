@@ -1,16 +1,28 @@
 import React, { Component } from 'react'
 import { getMovies } from './getMovies'
+import axios from 'axios'
 export default class Movies extends Component {
     constructor() {
+        console.log("Costructor")
         super();
         this.state = {
-            movies: getMovies(),
+            movies: [],
             currSearchText: '',
             sortBasis: '',
             currPage: 2,
             limit: 4
         }
     }
+
+    async componentDidMount(){
+        console.log("Cmponet Did mount")
+        let res = await axios.get('https://backend-react-movie.herokuapp.com/movies')
+        console.log(res);
+        this.setState({
+            movies: res.data.movies
+        })
+    }
+
     handleChange = (e) => {
         let val = e.target.value;
         console.log(val);
@@ -129,10 +141,10 @@ export default class Movies extends Component {
                                     <th scope="col">Rate
                                         <i
                                             onClick={this.sortByRatings}
-                                            class="fa fa-arrow-up" aria-hidden="true"></i>
+                                            className="fa fa-arrow-up" aria-hidden="true"></i>
                                         <i
                                             onClick={this.sortByRatings}
-                                            class="fa fa-arrow-down" aria-hidden="true"></i>
+                                            className="fa fa-arrow-down" aria-hidden="true"></i>
 
 
                                     </th>
