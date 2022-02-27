@@ -10,16 +10,21 @@ export default class Movies extends Component {
             currSearchText: '',
             sortBasis: '',
             currPage: 2,
-            limit: 4
+            limit: 4,
+            genres: [{ _id: 'abcd', name: 'All Genres' }],
+            cGenre: 'All Genres'
         }
     }
 
-    async componentDidMount(){
+    async componentDidMount() {
         console.log("Cmponet Did mount")
         let res = await axios.get('https://backend-react-movie.herokuapp.com/movies')
-        console.log(res);
+        let genreRes = await axios.get('https://backend-react-movie.herokuapp.com/genres');
+        //console.log(res);
+        console.log(genreRes.data.genres);
         this.setState({
-            movies: res.data.movies
+            movies: res.data.movies,
+            genres: [...this.state.genres, ...genreRes.data.genres]
         })
     }
 
@@ -71,15 +76,21 @@ export default class Movies extends Component {
         )
     }
 
-    handlePagechange=(pageNumber)=>{
+    handlePagechange = (pageNumber) => {
         this.setState({
-            currPage:pageNumber
+            currPage: pageNumber
+        })
+    }
+
+    handleGenreChange=(genre)=>{
+        this.setState({
+            cGenre:genre
         })
     }
 
     render() {
         console.log('render')
-        let { movies, currSearchText, currPage, limit } = this.state;
+        let { movies, currSearchText, currPage, limit, genres, cGenre } = this.state;
         let filteredArr = [];
         if (currSearchText == '') {
             filteredArr = movies;
@@ -113,82 +124,110 @@ export default class Movies extends Component {
             }
 
         }
-        let numberofPage= Math.ceil(filteredArr.length/limit);
-        let pageNumerArr=[];
-        
-        for(let i=0;i<numberofPage;i++){
-            pageNumerArr.push(i+1);
+
+        if(cGenre!='All Genres'){
+            filteredArr=filteredArr.filter(function(movieObj){
+                return movieObj.genre.name==cGenre
+            })
+        }
+
+        let numberofPage = Math.ceil(filteredArr.length / limit);
+        let pageNumerArr = [];
+
+        for (let i = 0; i < numberofPage; i++) {
+            pageNumerArr.push(i + 1);
         }
 
         let si = (currPage - 1) * limit;
         let ei = si + limit;
         filteredArr = filteredArr.slice(si, ei);
+
         return (
-            <div className='container'>
-                <div className='row'>
-                    <div className='col-3'>
+            <>
+                {this.state.movies.length == 0 ?
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div> :
+                    <div className='container'>
+                        <div className='row'>
+                            <div className='col-3'>
+                                <ul className="list-group">
+                                    {
+                                        genres.map((genreObj) => {
+                                            return (
+                                                <li
+                                                    onClick={()=>this.handleGenreChange(genreObj.name)}
+                                                    key={genreObj._id}
+                                                    className="list-group-item">{genreObj.name}</li>
+                                            )
+                                        })
+                                    }
+                                </ul>
+                                <h5>Current Genre {cGenre}</h5>
+                            </div>
+                            <div className='col-9'>
+                                <input type='search' value={this.state.currSearchText} onChange={this.handleChange}></input>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Title
+                                            </th>
+                                            <th scope="col">Genre</th>
+                                            <th scope="col">Stock</th>
+                                            <th scope="col">Rate
+                                                <i
+                                                    onClick={this.sortByRatings}
+                                                    className="fa fa-arrow-up" aria-hidden="true"></i>
+                                                <i
+                                                    onClick={this.sortByRatings}
+                                                    className="fa fa-arrow-down" aria-hidden="true"></i>
+
+
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {
+                                            filteredArr.map((movieObj) => {
+                                                return (
+                                                    <tr scope='row' key={movieObj._id}>
+                                                        <td></td>
+                                                        <td> {movieObj.title} </td>
+                                                        <td> {movieObj.genre.name} </td>
+                                                        <td>{movieObj.numberInStock}</td>
+                                                        <td>{movieObj.dailyRentalRate}</td>
+                                                        <td><button onClick={() => { return this.deleteHandler(movieObj._id) }} type="button" className="btn btn-danger">Delete</button>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    </tbody>
+                                </table>
+                                <nav aria-label="...">
+                                    <ul className="pagination">
+                                        {
+                                            pageNumerArr.map((pageNumber) => {
+                                                let classStyle = pageNumber == currPage ? 'page-item active' : 'page-item'
+                                                return (
+                                                    <li key={pageNumber} onClick={() => this.handlePagechange(pageNumber)} className={classStyle}><a className="page-link" href="#">{pageNumber}</a></li>
+                                                )
+                                            })
+
+                                        }
+
+                                    </ul>
+                                </nav>
+
+
+                            </div>
+                        </div>
                     </div>
-                    <div className='col-9'>
-                        <input type='search' value={this.state.currSearchText} onChange={this.handleChange}></input>
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Title
-                                    </th>
-                                    <th scope="col">Genre</th>
-                                    <th scope="col">Stock</th>
-                                    <th scope="col">Rate
-                                        <i
-                                            onClick={this.sortByRatings}
-                                            className="fa fa-arrow-up" aria-hidden="true"></i>
-                                        <i
-                                            onClick={this.sortByRatings}
-                                            className="fa fa-arrow-down" aria-hidden="true"></i>
 
-
-                                    </th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    filteredArr.map((movieObj) => {
-                                        return (
-                                            <tr scope='row' key={movieObj._id}>
-                                                <td></td>
-                                                <td> {movieObj.title} </td>
-                                                <td> {movieObj.genre.name} </td>
-                                                <td>{movieObj.numberInStock}</td>
-                                                <td>{movieObj.dailyRentalRate}</td>
-                                                <td><button onClick={() => { return this.deleteHandler(movieObj._id) }} type="button" className="btn btn-danger">Delete</button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })
-                                }
-                            </tbody>
-                        </table>
-                        <nav aria-label="...">
-                            <ul className="pagination">
-                             {
-                              pageNumerArr.map((pageNumber)=>{
-                                  let classStyle=pageNumber==currPage?'page-item active':'page-item'
-                                    return (
-                                        <li key={pageNumber} onClick={()=>this.handlePagechange(pageNumber)} className={classStyle}><a className="page-link" href="#">{pageNumber}</a></li>
-                                    )
-                                })
-                                      
-                             }
-                                
-                            </ul>
-                        </nav>
-
-
-                    </div>
-                </div>
-            </div>
-
+                }
+            </>
         )
     }
 }
